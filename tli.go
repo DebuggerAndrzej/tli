@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "tli/ui"
 
 func main() {
-	fmt.Println("Hello World")
+	ui.InitTui()
 }
