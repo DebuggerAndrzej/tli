@@ -7,7 +7,7 @@ import (
 )
 
 func InitTui() {
-	content, err := os.ReadFile("artichoke.md")
+	content, err := os.ReadFile("test2.log")
 	if err != nil {
 		fmt.Println("could not load file:", err)
 		os.Exit(1)
@@ -15,8 +15,8 @@ func InitTui() {
 
 	p := tea.NewProgram(
 		model{content: string(content)},
-		tea.WithAltScreen(),       // use the full size of the terminal in its "alternate screen buffer"
-		tea.WithMouseCellMotion(), // turn on mouse support so we can track the mouse wheel
+		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
 	)
 
 	if _, err := p.Run(); err != nil {

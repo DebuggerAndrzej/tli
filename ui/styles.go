@@ -5,15 +5,16 @@ import (
 )
 
 var (
-	titleStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Right = "├"
-		return lipgloss.NewStyle().BorderStyle(b).Padding(0, 1)
-	}()
-
-	infoStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Left = "┤"
-		return titleStyle.Copy().BorderStyle(b)
-	}()
+	mainTitleStyle = lipgloss.NewStyle().
+			Height(1).
+			Bold(true).
+			Align(lipgloss.Center, lipgloss.Center).
+			BorderStyle(lipgloss.ThickBorder()).
+			BorderBottom(true)
+	footerStyle = lipgloss.NewStyle().
+			Height(1).
+			Bold(false).
+			Align(lipgloss.Center, lipgloss.Center).
+			BorderStyle(lipgloss.ThickBorder()).
+			BorderTop(true)
 )
