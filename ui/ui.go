@@ -7,7 +7,7 @@ import (
 )
 
 func InitTui() {
-	content, err := os.ReadFile("test2.log")
+	content, err := os.ReadFile("logs/test2.log")
 	if err != nil {
 		fmt.Println("could not load file:", err)
 		os.Exit(1)
