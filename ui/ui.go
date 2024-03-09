@@ -7,14 +7,9 @@ import (
 )
 
 func InitTui() {
-	content, err := os.ReadFile("logs/test2.log")
-	if err != nil {
-		fmt.Println("could not load file:", err)
-		os.Exit(1)
-	}
-
+	model := initModel()
 	p := tea.NewProgram(
-		model{content: string(content)},
+		model,
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)
