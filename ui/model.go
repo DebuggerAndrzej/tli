@@ -2,9 +2,11 @@ package ui
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/viewport"
 	"strings"
 	"tli/backend"
+
+	"github.com/charmbracelet/bubbles/viewport"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
@@ -26,7 +28,13 @@ func initModel() model {
 
 	var sb strings.Builder
 	for _, logEntry := range logEntries {
-		sb.WriteString(fmt.Sprintf("%s --- %s\n", logEntry.Timestamp, logEntry.Message))
+		sb.WriteString(
+			lipgloss.JoinHorizontal(
+				lipgloss.Left,
+				timestampStyle.Render(logEntry.Timestamp),
+				logEntryBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+			) + "\n",
+		)
 	}
 	return model{content: sb.String()}
 }
