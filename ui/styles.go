@@ -17,6 +17,11 @@ var (
 			Align(lipgloss.Center, lipgloss.Center).
 			BorderStyle(lipgloss.ThickBorder()).
 			BorderTop(true)
+	inputStyle = lipgloss.NewStyle().
+			Height(1).
+			Bold(false).
+			BorderStyle(lipgloss.ThickBorder()).
+			BorderTop(true)
 	logEntryBaseStyle = lipgloss.NewStyle().
 				Width(180)
 	// https://github.com/charmbracelet/lipgloss/issues/85 formatting lost on line to long
