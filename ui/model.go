@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"tli/backend"
 	"tli/backend/entities"
@@ -14,11 +15,11 @@ import (
 )
 
 type model struct {
-	logEntries     []entities.LogEntry
-	currentContent string
-	ready          bool
-	viewport       viewport.Model
-	textInput      textinput.Model
+	logEntries []entities.LogEntry
+	ready      bool
+	viewport   viewport.Model
+	textInput  textinput.Model
+	filters    []string
 }
 
 func (m model) headerView() string {
@@ -38,7 +39,7 @@ func (m model) handleTextInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.textInput.Blur()
 			return m, nil
 		}
-		return m, tea.Cmd(m.updateViewportContent)
+		return m, tea.Cmd(m.updateFilters)
 	}
 	var cmd tea.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
@@ -49,26 +50,40 @@ func initModel() model {
 	return model{logEntries: backend.LoadFile("logs/test2.log"), textInput: textinput.New()}
 }
 
-func (m model) getViewportContent() string {
-	var sb strings.Builder
-	for _, logEntry := range m.logEntries {
-		sb.WriteString(
-			lipgloss.JoinHorizontal(
-				lipgloss.Left,
-				timestampStyle.Render(logEntry.Timestamp),
-				logEntryBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
-			) + "\n",
-		)
-	}
-	return sb.String()
+func (m model) updateFilters() tea.Msg {
+	return requiresFiltersUpdate(true)
+}
+
+func (m model) clearFilters() tea.Msg {
+	return clearAllFilters(true)
 }
 
 func (m model) updateViewportContent() tea.Msg {
 	var sb strings.Builder
-	for _, entry := range strings.Split(m.currentContent, "\n") {
-		if strings.Contains(entry, m.textInput.Value()) {
-			sb.WriteString(entry + "\n")
+	if len(m.filters) == 0 {
+		for _, logEntry := range m.logEntries {
+			sb.WriteString(
+				lipgloss.JoinHorizontal(
+					lipgloss.Left,
+					timestampStyle.Render(logEntry.Timestamp),
+					logEntryBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+				) + "\n",
+			)
+		}
+	} else {
+		var filterRegex = regexp.MustCompile(strings.Join(m.filters, "|"))
+		for _, logEntry := range m.logEntries {
+			if filterRegex.MatchString(logEntry.Message) {
+				sb.WriteString(
+					lipgloss.JoinHorizontal(
+						lipgloss.Left,
+						timestampStyle.Render(logEntry.Timestamp),
+						logEntryBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+					) + "\n",
+				)
+			}
 		}
 	}
+
 	return updatedContents(sb.String())
 }

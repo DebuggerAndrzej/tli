@@ -11,6 +11,8 @@ import (
 const useHighPerformanceRenderer = false
 
 type updatedContents string
+type requiresFiltersUpdate bool
+type clearAllFilters bool
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -34,8 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.textInput.Focus()
 			return m, nil
 		case "r":
-			m.currentContent = m.getViewportContent()
-			m.viewport.SetContent(m.currentContent)
+			return m, tea.Cmd(m.clearFilters)
 		}
 
 		if k := msg.String(); k == "ctrl+c" || k == "q" || k == "esc" {
@@ -51,10 +52,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
 			m.viewport.YPosition = headerHeight
 			m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
-			m.currentContent = m.getViewportContent()
-			m.viewport.SetContent(m.currentContent)
 			m.ready = true
 			m.viewport.YPosition = headerHeight + 1
+			cmds = append(cmds, m.updateViewportContent)
 		} else {
 			m.viewport.Width = msg.Width
 			m.viewport.Height = msg.Height - verticalMarginHeight
@@ -63,10 +63,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, viewport.Sync(m.viewport))
 		}
 	case updatedContents:
-		m.currentContent = string(msg)
-		m.viewport.SetContent(m.currentContent)
+		m.viewport.SetContent(string(msg))
 		m.textInput.Blur()
 		m.textInput.Reset()
+	case requiresFiltersUpdate:
+		m.filters = append(m.filters, m.textInput.Value())
+		return m, tea.Cmd(m.updateViewportContent)
+	case clearAllFilters:
+		if len(m.filters) == 0 {
+			return m, nil
+		}
+		m.filters = nil
+		return m, tea.Cmd(m.updateViewportContent)
 	}
 	m.viewport, cmd = m.viewport.Update(msg)
 	cmds = append(cmds, cmd)
