@@ -22,8 +22,8 @@ type model struct {
 	filters    []string
 }
 
-func initModel() model {
-	return model{logEntries: backend.LoadFile("logs/test2.log"), textInput: textinput.New()}
+func initModel(filePath string) model {
+	return model{logEntries: backend.LoadFile(filePath), textInput: textinput.New()}
 }
 
 func (m model) headerView() string {
