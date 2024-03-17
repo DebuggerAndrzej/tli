@@ -22,10 +22,7 @@ var (
 			Bold(false).
 			BorderStyle(lipgloss.ThickBorder()).
 			BorderTop(true)
-	logEntryBaseStyle = lipgloss.NewStyle().
-				Width(180)
-	// https://github.com/charmbracelet/lipgloss/issues/85 formatting lost on line to long
-	timestampStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#A9A9A9")).Width(20)
+	timestampStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#A9A9A9"))
 )
 
 func GetColorForEntry(level string) lipgloss.Color {

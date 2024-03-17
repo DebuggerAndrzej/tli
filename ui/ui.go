@@ -6,8 +6,8 @@ import (
 	"os"
 )
 
-func InitTui(filePath string) {
-	model := initModel(filePath)
+func InitTui(filePath string, logFormat string) {
+	model := initModel(filePath, logFormat)
 	p := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),

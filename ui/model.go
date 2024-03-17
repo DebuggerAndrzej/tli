@@ -24,8 +24,8 @@ type model struct {
 	inputType     string
 }
 
-func initModel(filePath string) model {
-	return model{logEntries: backend.LoadFile(filePath), textInput: textinput.New()}
+func initModel(filePath string, logFormat string) model {
+	return model{logEntries: backend.LoadFile(filePath, logFormat), textInput: textinput.New()}
 }
 
 func (m model) headerView() string {
@@ -120,13 +120,16 @@ func (m model) clearFilters() (tea.Model, tea.Cmd) {
 
 func (m model) updateViewportContent() tea.Msg {
 	var sb strings.Builder
+	logBaseStyle := lipgloss.NewStyle().
+		Width(m.viewport.Width - lipgloss.Width(timestampStyle.Render(m.logEntries[0].Timestamp)) - 3).
+		MarginLeft(3)
 	if !m.hasAnyFilters() {
 		for _, logEntry := range m.logEntries {
 			sb.WriteString(
 				lipgloss.JoinHorizontal(
 					lipgloss.Left,
 					timestampStyle.Render(logEntry.Timestamp),
-					logEntryBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+					logBaseStyle.Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
 				) + "\n",
 			)
 		}
@@ -137,7 +140,7 @@ func (m model) updateViewportContent() tea.Msg {
 					lipgloss.JoinHorizontal(
 						lipgloss.Left,
 						timestampStyle.Render(logEntry.Timestamp),
-						logEntryBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+						logBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
 					) + "\n",
 				)
 			}
