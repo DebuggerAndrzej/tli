@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"tli/ui"
+	"github.com/DebuggerAndrzej/tli/ui"
 )
 
 func main() {

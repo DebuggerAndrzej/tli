@@ -2,10 +2,10 @@ package ui
 
 import (
 	"fmt"
+	"github.com/DebuggerAndrzej/tli/backend"
+	"github.com/DebuggerAndrzej/tli/backend/entities"
 	"regexp"
 	"strings"
-	"tli/backend"
-	"tli/backend/entities"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
