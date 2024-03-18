@@ -2,17 +2,19 @@ package ui
 
 import (
 	"fmt"
-	"github.com/DebuggerAndrzej/tli/backend"
-	"github.com/DebuggerAndrzej/tli/backend/entities"
 	"regexp"
 	"strings"
+
+	"github.com/DebuggerAndrzej/tli/backend"
+	"github.com/DebuggerAndrzej/tli/backend/entities"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-
 	"github.com/charmbracelet/lipgloss"
 )
+
+const useHighPerformanceRenderer = false
 
 type model struct {
 	logEntries    []entities.LogEntry
@@ -22,6 +24,7 @@ type model struct {
 	weakFilters   []string
 	strongFilters []string
 	inputType     string
+	emptyViewport bool
 }
 
 func initModel(filePath string, logFormat string) model {
@@ -35,6 +38,9 @@ func (m model) headerView() string {
 func (m model) footerView() string {
 	if m.textInput.Focused() {
 		return inputStyle.Width(m.viewport.Width).Render(m.textInput.View())
+	}
+	if m.emptyViewport {
+		return footerStyle.Width(m.viewport.Width).Render("Expected your logs here? Good luck next time!")
 	}
 	return footerStyle.Width(m.viewport.Width).Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
 }

@@ -4,9 +4,8 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
-
-const useHighPerformanceRenderer = false
 
 type updatedContents string
 
@@ -23,6 +22,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		return m.handleWindowSizeMsg(msg)
 	case updatedContents:
+		if string(msg) == "" {
+			m.emptyViewport = true
+		} else {
+			m.emptyViewport = false
+		}
 		m.viewport.SetContent(string(msg))
 	}
 	return m, nil
@@ -32,5 +36,18 @@ func (m model) View() string {
 	if !m.ready {
 		return "\n  Initializing..."
 	}
-	return fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView())
+	var mainContent string
+	if m.emptyViewport {
+		height := m.viewport.Height
+		width := m.viewport.Width
+		emptyViewStyle := lipgloss.NewStyle().
+			Width(width).
+			Height(height).
+			PaddingTop(height/2 - 1).
+			PaddingLeft(width/2 - 8)
+		mainContent = emptyViewStyle.Render("No results left...")
+	} else {
+		mainContent = m.viewport.View()
+	}
+	return fmt.Sprintf("%s\n%s\n%s", m.headerView(), mainContent, m.footerView())
 }

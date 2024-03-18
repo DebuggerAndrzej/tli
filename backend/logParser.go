@@ -2,10 +2,11 @@ package backend
 
 import (
 	"fmt"
-	"github.com/DebuggerAndrzej/tli/backend/entities"
 	"os"
 	"slices"
 	"strings"
+
+	"github.com/DebuggerAndrzej/tli/backend/entities"
 )
 
 func LoadFile(filePath, logFormat string) []entities.LogEntry {
