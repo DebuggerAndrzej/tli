@@ -8,12 +8,12 @@ import (
 )
 
 func main() {
-	filePath := flag.String("path", "", "Full path to log file")
-	logFormat := flag.String("format", "", "log format")
+	logFormat := flag.String("f", "M", "log format")
 	flag.Parse()
+	filePath := flag.Arg(0)
 
-	if *filePath != "" {
-		ui.InitTui(*filePath, *logFormat)
+	if filePath != "" {
+		ui.InitTui(filePath, *logFormat)
 	} else {
 		fmt.Println("Next time provide a file to open")
 	}
