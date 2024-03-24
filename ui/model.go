@@ -27,8 +27,8 @@ type model struct {
 	emptyViewport bool
 }
 
-func initModel(filePath string, logFormat string) model {
-	return model{logEntries: backend.LoadFile(filePath, logFormat), textInput: textinput.New()}
+func initModel(filePath, logFormat, pipedInput string) model {
+	return model{logEntries: backend.LoadData(filePath, logFormat, pipedInput), textInput: textinput.New()}
 }
 
 func (m model) headerView() string {
