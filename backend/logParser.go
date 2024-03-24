@@ -9,14 +9,20 @@ import (
 	"github.com/DebuggerAndrzej/tli/backend/entities"
 )
 
-func LoadFile(filePath, logFormat string) []entities.LogEntry {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		fmt.Println("could not load file:", err)
-		os.Exit(1)
+func LoadData(filePath, logFormat, pipedInput string) []entities.LogEntry {
+	var content string
+	if filePath != "" {
+		fileContent, err := os.ReadFile(filePath)
+		if err != nil {
+			fmt.Println("Could not load file:", err)
+			os.Exit(1)
+		}
+		content = string(fileContent)
+	} else {
+		content = pipedInput
 	}
 	var logEntries []entities.LogEntry
-	for _, entry := range strings.Split(string(content), "\n") {
+	for _, entry := range strings.Split(content, "\n") {
 		logEntries = append(logEntries, getLogEntryForLine(entry, logFormat))
 	}
 

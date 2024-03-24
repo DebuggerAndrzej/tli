@@ -7,8 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func InitTui(filePath string, logFormat string) {
-	model := initModel(filePath, logFormat)
+func InitTui(filePath, logFormat, pipedInput string) {
+	model := initModel(filePath, logFormat, pipedInput)
 	p := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),
