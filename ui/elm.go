@@ -3,11 +3,13 @@ package ui
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type updatedContents string
+type syncMsg bool
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -28,6 +30,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.emptyViewport = false
 		}
 		m.viewport.SetContent(string(msg))
+		return m, requiresSync
+	case syncMsg:
+		return m, viewport.Sync(m.viewport)
 	}
 	return m, nil
 }
@@ -50,4 +55,8 @@ func (m model) View() string {
 		mainContent = m.viewport.View()
 	}
 	return fmt.Sprintf("%s\n%s\n%s", m.headerView(), mainContent, m.footerView())
+}
+
+func requiresSync() tea.Msg {
+	return syncMsg(true)
 }

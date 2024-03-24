@@ -14,8 +14,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const useHighPerformanceRenderer = false
-
 type model struct {
 	logEntries    []entities.LogEntry
 	ready         bool
@@ -94,25 +92,19 @@ func (m model) viewPortUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
 	headerHeight := lipgloss.Height(m.headerView())
 	footerHeight := lipgloss.Height(m.footerView())
-	verticalMarginHeight := headerHeight + footerHeight
+	verticalMarginHeight := headerHeight + footerHeight + 1
 	if !m.ready {
 		m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
-		m.viewport.YPosition = headerHeight
-		m.viewport.HighPerformanceRendering = useHighPerformanceRenderer
+		m.viewport.HighPerformanceRendering = true 
 		m.ready = true
-		m.viewport.YPosition = headerHeight + 1
-		cmds = append(cmds, m.updateViewportContent)
+		m.viewport.YPosition = headerHeight + 1  
 	} else {
 		m.viewport.Width = msg.Width
 		m.viewport.Height = msg.Height - verticalMarginHeight
 	}
-	if useHighPerformanceRenderer {
-		cmds = append(cmds, viewport.Sync(m.viewport))
-	}
-	return m, tea.Batch(cmds...)
+	return m, m.updateViewportContent
 }
 
 func (m model) clearFilters() (tea.Model, tea.Cmd) {
@@ -126,16 +118,14 @@ func (m model) clearFilters() (tea.Model, tea.Cmd) {
 
 func (m model) updateViewportContent() tea.Msg {
 	var sb strings.Builder
-	logBaseStyle := lipgloss.NewStyle().
-		Width(m.viewport.Width - lipgloss.Width(timestampStyle.Render(m.logEntries[0].Timestamp)) - 3).
-		MarginLeft(3)
 	if !m.hasAnyFilters() {
 		for _, logEntry := range m.logEntries {
 			sb.WriteString(
 				lipgloss.JoinHorizontal(
 					lipgloss.Left,
 					timestampStyle.Render(logEntry.Timestamp),
-					logBaseStyle.Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+					"  ",
+					lipgloss.NewStyle().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
 				) + "\n",
 			)
 		}
@@ -146,7 +136,8 @@ func (m model) updateViewportContent() tea.Msg {
 					lipgloss.JoinHorizontal(
 						lipgloss.Left,
 						timestampStyle.Render(logEntry.Timestamp),
-						logBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
+						"  ",
+						lipgloss.NewStyle().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
 					) + "\n",
 				)
 			}
@@ -183,3 +174,4 @@ func (m model) doesMatchStrongFilters(message string) bool {
 	}
 	return true
 }
+
