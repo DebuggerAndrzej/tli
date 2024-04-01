@@ -21,6 +21,7 @@ type model struct {
 	textInput     textinput.Model
 	weakFilters   []string
 	strongFilters []string
+	highlights    []string
 	inputType     string
 	emptyViewport bool
 }
@@ -46,24 +47,32 @@ func (m model) footerView() string {
 func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch m.textInput.Focused() {
 	case true:
-		if msg.String() == "enter" {
+		switch keypress := msg.String(); keypress {
+		case "esc":
+			m.textInput.Blur()
+			m.textInput.Reset()
+			return m, nil
+		case "enter":
 			inputValue := m.textInput.Value()
 			m.textInput.Blur()
 			m.textInput.Reset()
 			if inputValue == "" {
 				return m, nil
 			}
-			if m.inputType == "Weak filter" {
+			switch m.inputType {
+			case "Weak filter":
 				m.weakFilters = append(m.weakFilters, inputValue)
-			}
-			if m.inputType == "Strong filter" {
+			case "Strong filter":
 				m.strongFilters = append(m.strongFilters, inputValue)
+			case "Highlight":
+				m.highlights = append(m.highlights, inputValue)
 			}
 			return m, tea.Cmd(m.updateViewportContent)
+		default:
+			var cmd tea.Cmd
+			m.textInput, cmd = m.textInput.Update(msg)
+			return m, cmd
 		}
-		var cmd tea.Cmd
-		m.textInput, cmd = m.textInput.Update(msg)
-		return m, cmd
 	case false:
 		switch keypress := msg.String(); keypress {
 		case "q":
@@ -76,8 +85,12 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.textInput.Focus()
 			m.inputType = "Strong filter"
 			return m, nil
+		case "h":
+			m.textInput.Focus()
+			m.inputType = "Highlight"
+			return m, nil
 		case "r":
-			return m.clearFilters()
+			return m.resetModifiers()
 		default:
 			return m.viewPortUpdate(msg)
 		}
@@ -106,17 +119,18 @@ func (m model) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 	return m, m.updateViewportContent
 }
 
-func (m model) clearFilters() (tea.Model, tea.Cmd) {
-	if !m.hasAnyFilters() {
+func (m model) resetModifiers() (tea.Model, tea.Cmd) {
+	if !m.hasAnyFilters() && len(m.highlights) == 0 {
 		return m, nil
 	}
 	m.strongFilters = nil
 	m.weakFilters = nil
+	m.highlights = nil
 	return m, tea.Cmd(m.updateViewportContent)
 }
 
 func (m model) updateViewportContent() tea.Msg {
-	var sb strings.Builder
+	var builder strings.Builder
 	var logBaseStyle lipgloss.Style
 	if m.logEntries[0].Timestamp == "" {
 		logBaseStyle = lipgloss.NewStyle().Width(m.viewport.Width)
@@ -127,29 +141,17 @@ func (m model) updateViewportContent() tea.Msg {
 	}
 	if !m.hasAnyFilters() {
 		for _, logEntry := range m.logEntries {
-			sb.WriteString(
-				lipgloss.JoinHorizontal(
-					lipgloss.Left,
-					timestampStyle.Render(logEntry.Timestamp),
-					logBaseStyle.Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
-				) + "\n",
-			)
+			addLineToStringBuilder(&builder, logEntry, logBaseStyle, m.highlights)
 		}
 	} else {
 		for _, logEntry := range m.logEntries {
 			if m.doesMatchFilters(logEntry.Message) {
-				sb.WriteString(
-					lipgloss.JoinHorizontal(
-						lipgloss.Left,
-						timestampStyle.Render(logEntry.Timestamp),
-						logBaseStyle.Copy().Foreground(GetColorForEntry(logEntry.Level)).Render(logEntry.Message),
-					) + "\n",
-				)
+				addLineToStringBuilder(&builder, logEntry, logBaseStyle, m.highlights)
 			}
 		}
 	}
 
-	return updatedContents(sb.String())
+	return updatedContents(builder.String())
 }
 
 func (m model) hasAnyFilters() bool {
