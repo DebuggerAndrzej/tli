@@ -1,4 +1,4 @@
-2015-10-19 17:39:19,594 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Created MRAppMaster for application appattempt_1445182159119_0019_000001
+2015-10-19 17:39:47,235 INFO TOTALYRANDOMTEXT
 2015-10-19 17:39:20,969 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Executing with tokens:
 2015-10-19 17:39:20,969 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Kind: YARN_AM_RM_TOKEN, Service: , Ident: (appAttemptId { application_id { id: 19 cluster_timestamp: 1445182159119 } attemptId: 1 } keyId: 1694045684)
 2015-10-19 17:39:21,234 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Using mapred newApiCommitter.
@@ -185,6 +185,7 @@
 2015-10-19 17:39:46,829 INFO [IPC Server handler 21 on 58957] org.apache.hadoop.mapred.TaskAttemptListenerImpl: JVM with ID : jvm_1445182159119_0019_m_000003 asked for a task
 2015-10-19 17:39:46,829 INFO [IPC Server handler 21 on 58957] org.apache.hadoop.mapred.TaskAttemptListenerImpl: JVM with ID: jvm_1445182159119_0019_m_000003 given task: attempt_1445182159119_0019_m_000001_0
 2015-10-19 17:39:47,235 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Recalculating schedule, headroom=<memory:0, vCores:-27>
+2015-10-19 17:39:47,235 INFO TOTALYRANDOMTEXT
 2015-10-19 17:39:47,235 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Reduce slow start threshold not met. completedMapsForReduceSlowstart 1
 2015-10-19 17:39:48,376 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Recalculating schedule, headroom=<memory:0, vCores:-27>
 2015-10-19 17:39:48,376 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Reduce slow start threshold not met. completedMapsForReduceSlowstart 1
@@ -300,6 +301,7 @@
 2015-10-19 17:40:40,018 INFO [IPC Server handler 26 on 58957] org.apache.hadoop.mapred.TaskAttemptListenerImpl: Progress of TaskAttempt attempt_1445182159119_0019_m_000001_0 is : 0.057642248
 2015-10-19 17:40:40,065 INFO [IPC Server handler 21 on 58957] org.apache.hadoop.mapred.TaskAttemptListenerImpl: Progress of TaskAttempt attempt_1445182159119_0019_m_000000_0 is : 0.099006966
 2015-10-19 17:40:44,362 INFO [IPC Server handler 11 on 58957] org.apache.hadoop.mapred.TaskAttemptListenerImpl: Progress of TaskAttempt attempt_1445182159119_0019_m_000001_0 is : 0.05927201
+2015-10-19 17:39:47,235 INFO TOTALYRANDOMTEXT
 2015-10-19 17:40:44,534 INFO [IPC Server handler 5 on 58957] org.apache.hadoop.mapred.TaskAttemptListenerImpl: Progress of TaskAttempt attempt_1445182159119_0019_m_000000_0 is : 0.102587774
 2015-10-19 17:40:47,674 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Recalculating schedule, headroom=<memory:0, vCores:-27>
 2015-10-19 17:40:47,674 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Reduce slow start threshold not met. completedMapsForReduceSlowstart 1
@@ -392,3 +394,5 @@
 2015-10-19 17:41:25,988 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Reduce slow start threshold not met. completedMapsForReduceSlowstart 1
 2015-10-19 17:41:27,035 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Recalculating schedule, headroom=<memory:0, vCores:-27>
 2015-10-19 17:41:27,035 INFO [RMCommunicator Allocator] org.apache.hadoop.mapreduce.v2.app.rm.RMContainerAllocator: Reduce slow start threshold not met. completedMapsForReduceSlowstart 1
+2015-10-19 17:39:19,594 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Created MRAppMaster for application appattempt_1445182159119_0019_000001
+2015-10-19 17:39:47,235 INFO TOTALYRANDOMTEXT
