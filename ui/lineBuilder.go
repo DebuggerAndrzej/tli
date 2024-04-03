@@ -12,11 +12,18 @@ func addLineToStringBuilder(
 	logEntry entities.LogEntry,
 	logBaseStyle lipgloss.Style,
 	highlights []string,
+	searched string,
+	searchedOccurances *[]int,
+	lineIndex int,
 ) {
 	messageColor := lipgloss.NewStyle().Foreground(GetColorForEntry(logEntry.Level))
 	styledMessage := removeStyleEnd(messageColor.Render(logEntry.Message))
 	if len(highlights) > 0 && lineContainsHighlight(logEntry.Message, highlights) {
 		addHighlightToMessage(&styledMessage, messageColor, highlights)
+	}
+	if searched != "" && strings.Contains(logEntry.Message, searched) {
+		*searchedOccurances = append(*searchedOccurances, lineIndex)
+		addSearchedTextHighlight(&styledMessage, messageColor, searched)
 	}
 	builder.WriteString(prepareLine(styledMessage, logEntry.Timestamp, logBaseStyle, timestampStyle))
 }
@@ -47,6 +54,19 @@ func addHighlightToMessage(message *string, messageColor lipgloss.Style, highlig
 	}
 }
 
+func addSearchedTextHighlight(message *string, messageColor lipgloss.Style, searched string) {
+	*message = strings.Replace(
+		*message,
+		searched,
+		lipgloss.NewStyle().
+			Background(lipgloss.Color("#7FBBB3")).
+			Render(searched)+
+			removeStyleEnd(
+				messageColor.Render(""),
+			),
+		-1,
+	)
+}
 func lineContainsHighlight(line string, highlights []string) bool {
 	for _, textToHighligh := range highlights {
 		if strings.Contains(line, textToHighligh) {

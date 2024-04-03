@@ -7,7 +7,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type updatedContents string
+type updatedContents struct {
+	Content         string
+	searchedIndexes []int
+	maxIndex        int
+}
 
 func (m model) Init() tea.Cmd {
 	return nil
@@ -22,12 +26,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		return m.handleWindowSizeMsg(msg)
 	case updatedContents:
-		if string(msg) == "" {
+		if msg.Content == "" {
 			m.emptyViewport = true
 		} else {
 			m.emptyViewport = false
 		}
-		m.viewport.SetContent(string(msg))
+		m.viewport.SetContent(msg.Content)
+		m.searchedOccurances = msg.searchedIndexes
+		m.visibleLogEntriesAmount = msg.maxIndex
 	}
 	return m, nil
 }

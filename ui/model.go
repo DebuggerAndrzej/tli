@@ -15,15 +15,19 @@ import (
 )
 
 type model struct {
-	logEntries    []entities.LogEntry
-	ready         bool
-	viewport      viewport.Model
-	textInput     textinput.Model
-	weakFilters   []string
-	strongFilters []string
-	highlights    []string
-	inputType     string
-	emptyViewport bool
+	logEntries              []entities.LogEntry
+	ready                   bool
+	viewport                viewport.Model
+	textInput               textinput.Model
+	weakFilters             []string
+	strongFilters           []string
+	highlights              []string
+	inputType               string
+	emptyViewport           bool
+	searched                string
+	searchedOccurances      []int
+	visibleLogEntriesAmount int
+	currentSearchIndex      int
 }
 
 func initModel(filePath, logFormat, pipedInput string) model {
@@ -66,6 +70,8 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.strongFilters = append(m.strongFilters, inputValue)
 			case "Highlight":
 				m.highlights = append(m.highlights, inputValue)
+			case "Search":
+				m.searched = inputValue
 			}
 			return m, tea.Cmd(m.updateViewportContent)
 		default:
@@ -88,6 +94,29 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		case "h":
 			m.textInput.Focus()
 			m.inputType = "Highlight"
+			return m, nil
+		case "/":
+			m.textInput.Focus()
+			m.inputType = "Search"
+			return m, nil
+		case "n":
+			if m.searchedOccurances == nil {
+				return m, nil
+			}
+			offset := float64(
+				m.searchedOccurances[m.currentSearchIndex],
+			) * float64(
+				m.viewport.TotalLineCount()-m.viewport.Height,
+			) / float64(
+				m.visibleLogEntriesAmount,
+			)
+
+			if m.currentSearchIndex != len(m.searchedOccurances)-1 {
+				m.currentSearchIndex++
+			} else {
+				m.currentSearchIndex = 0
+			}
+			m.viewport.SetYOffset(int(offset))
 			return m, nil
 		case "r":
 			return m.resetModifiers()
@@ -120,18 +149,22 @@ func (m model) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) resetModifiers() (tea.Model, tea.Cmd) {
-	if !m.hasAnyFilters() && len(m.highlights) == 0 {
+	if !m.hasAnyFilters() && len(m.highlights) == 0 && m.searched == "" {
 		return m, nil
 	}
 	m.strongFilters = nil
 	m.weakFilters = nil
 	m.highlights = nil
+	m.searched = ""
+	m.searchedOccurances = nil
 	return m, tea.Cmd(m.updateViewportContent)
 }
 
 func (m model) updateViewportContent() tea.Msg {
 	var builder strings.Builder
 	var logBaseStyle lipgloss.Style
+	var searchedOccurances []int
+	var maxIndex int
 	if m.logEntries[0].Timestamp == "" {
 		logBaseStyle = lipgloss.NewStyle().Width(m.viewport.Width)
 	} else {
@@ -140,18 +173,31 @@ func (m model) updateViewportContent() tea.Msg {
 			MarginLeft(3)
 	}
 	if !m.hasAnyFilters() {
-		for _, logEntry := range m.logEntries {
-			addLineToStringBuilder(&builder, logEntry, logBaseStyle, m.highlights)
+		for index, logEntry := range m.logEntries {
+			addLineToStringBuilder(
+				&builder,
+				logEntry,
+				logBaseStyle,
+				m.highlights,
+				m.searched,
+				&searchedOccurances,
+				index,
+			)
 		}
+		maxIndex = len(m.logEntries)
 	} else {
+		var relativeIndex int
 		for _, logEntry := range m.logEntries {
 			if m.doesMatchFilters(logEntry.Message) {
-				addLineToStringBuilder(&builder, logEntry, logBaseStyle, m.highlights)
+				addLineToStringBuilder(&builder, logEntry, logBaseStyle, m.highlights, m.searched, &searchedOccurances, relativeIndex)
+				relativeIndex++
 			}
 		}
+		maxIndex = relativeIndex
 	}
 
-	return updatedContents(builder.String())
+	entries := builder.String()
+	return updatedContents{entries, searchedOccurances, maxIndex}
 }
 
 func (m model) hasAnyFilters() bool {
