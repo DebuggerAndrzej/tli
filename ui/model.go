@@ -72,8 +72,9 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 				m.highlights = append(m.highlights, inputValue)
 			case "Search":
 				m.searched = inputValue
+				m.currentSearchIndex = 0
 			}
-			return m, tea.Cmd(m.updateViewportContent)
+			return m, tea.Sequence(m.updateViewportContent, m.requiresOffsetCalculation)
 		default:
 			var cmd tea.Cmd
 			m.textInput, cmd = m.textInput.Update(msg)
@@ -100,24 +101,19 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.inputType = "Search"
 			return m, nil
 		case "n":
-			if m.searchedOccurances == nil {
-				return m, nil
-			}
-			offset := float64(
-				m.searchedOccurances[m.currentSearchIndex],
-			) * float64(
-				m.viewport.TotalLineCount()-m.viewport.Height,
-			) / float64(
-				m.visibleLogEntriesAmount,
-			)
-
 			if m.currentSearchIndex != len(m.searchedOccurances)-1 {
 				m.currentSearchIndex++
 			} else {
 				m.currentSearchIndex = 0
 			}
-			m.viewport.SetYOffset(int(offset))
-			return m, nil
+			return m, m.requiresOffsetCalculation
+		case "N":
+			if m.currentSearchIndex != 0 {
+				m.currentSearchIndex--
+			} else {
+				m.currentSearchIndex = len(m.searchedOccurances) - 1
+			}
+			return m, m.requiresOffsetCalculation
 		case "r":
 			return m.resetModifiers()
 		default:
@@ -125,6 +121,30 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	}
 	return m, nil
+}
+
+func (m model) requiresOffsetCalculation() tea.Msg {
+	return requiresOffsetCalculation(true)
+}
+
+func (m model) updateYOffset() (model, tea.Cmd) {
+	if m.searchedOccurances == nil {
+		return m, nil
+	}
+	offset := m.caculateViewportOffsetForSearchHit()
+	m.viewport.SetYOffset(offset)
+	return m, nil
+}
+
+func (m model) caculateViewportOffsetForSearchHit() int {
+	return int(
+		float64(
+			m.searchedOccurances[m.currentSearchIndex],
+		) * float64(
+			m.viewport.TotalLineCount()-m.viewport.Height,
+		) / float64(
+			m.visibleLogEntriesAmount,
+		))
 }
 
 func (m model) viewPortUpdate(msg tea.Msg) (tea.Model, tea.Cmd) {
