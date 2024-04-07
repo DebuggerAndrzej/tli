@@ -7,6 +7,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type requiresOffsetCalculation bool
+
 type updatedContents struct {
 	Content         string
 	searchedIndexes []int
@@ -34,7 +36,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.viewport.SetContent(msg.Content)
 		m.searchedOccurances = msg.searchedIndexes
 		m.visibleLogEntriesAmount = msg.maxIndex
+	case requiresOffsetCalculation:
+		return m.updateYOffset()
 	}
+
 	return m, nil
 }
 
