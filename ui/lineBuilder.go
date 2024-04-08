@@ -7,6 +7,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+var highlightColors = []string{"#66961f", "#5934f0", "#9228da", "#c434c4", "#174348"}
+
 func addLineToStringBuilder(
 	builder *strings.Builder,
 	logEntry entities.LogEntry,
@@ -37,13 +39,16 @@ func prepareLine(message, timestamp string, messageStyle, timestampStyle lipglos
 }
 
 func addHighlightToMessage(message *string, messageColor lipgloss.Style, highlights []string) {
-	for _, highlight := range highlights {
+	for index, highlight := range highlights {
+		if index >= len(highlightColors) {
+			index = index % len(highlightColors)
+		}
 		if strings.Contains(*message, highlight) {
 			*message = strings.Replace(
 				*message,
 				highlight,
 				lipgloss.NewStyle().
-					Background(lipgloss.Color("#4F5B58")).
+					Background(lipgloss.Color(highlightColors[index])).
 					Render(highlight)+
 					removeStyleEnd(
 						messageColor.Render(""),
