@@ -23,7 +23,10 @@ func LoadData(filePath, logFormat, pipedInput string) []entities.LogEntry {
 	}
 	var logEntries []entities.LogEntry
 	for _, entry := range strings.Split(content, "\n") {
-		logEntries = append(logEntries, getLogEntryForLine(entry, logFormat))
+		logEntry := getLogEntryForLine(entry, logFormat)
+		if logEntry.Message != "" {
+			logEntries = append(logEntries, logEntry)
+		}
 	}
 
 	return logEntries
