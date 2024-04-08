@@ -28,6 +28,7 @@ type model struct {
 	searchedOccurances      []int
 	visibleLogEntriesAmount int
 	currentSearchIndex      int
+	minimalSeverity         string
 }
 
 func initModel(filePath, logFormat, pipedInput string) model {
@@ -92,6 +93,12 @@ func (m model) handleKeyInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.textInput.Focus()
 			m.inputType = "Strong filter"
 			return m, nil
+		case "w":
+			m.minimalSeverity = "WARN"
+			return m, m.updateViewportContent
+		case "e":
+			m.minimalSeverity = "ERROR"
+			return m, m.updateViewportContent
 		case "h":
 			m.textInput.Focus()
 			m.inputType = "Highlight"
@@ -174,6 +181,7 @@ func (m model) resetModifiers() (tea.Model, tea.Cmd) {
 	}
 	m.strongFilters = nil
 	m.weakFilters = nil
+	m.minimalSeverity = ""
 	m.highlights = nil
 	m.searched = ""
 	m.searchedOccurances = nil
@@ -208,7 +216,7 @@ func (m model) updateViewportContent() tea.Msg {
 	} else {
 		var relativeIndex int
 		for _, logEntry := range m.logEntries {
-			if m.doesMatchFilters(logEntry.Message) {
+			if m.doesMatchFilters(logEntry.Message, logEntry.Level) {
 				addLineToStringBuilder(&builder, logEntry, logBaseStyle, m.highlights, m.searched, &searchedOccurances, relativeIndex)
 				relativeIndex++
 			}
@@ -221,16 +229,29 @@ func (m model) updateViewportContent() tea.Msg {
 }
 
 func (m model) hasAnyFilters() bool {
-	return len(m.weakFilters)+len(m.strongFilters) > 0
+	return len(m.weakFilters)+len(m.strongFilters) > 0 || m.minimalSeverity != ""
 }
 
-func (m model) doesMatchFilters(message string) bool {
+func (m model) doesMatchFilters(message, level string) bool {
 	weakFilterRegex := regexp.MustCompile(strings.Join(m.weakFilters, "|"))
 	if !weakFilterRegex.MatchString(message) {
 		return false
 	}
 
 	if len(m.strongFilters) > 0 && !m.doesMatchStrongFilters(message) {
+		return false
+	}
+
+	if m.minimalSeverity != "" && level != "" {
+		if m.minimalSeverity == "WARN" {
+			if level == "WARN" || level == "ERROR" {
+				return true
+			}
+		} else {
+			if level == "ERROR" {
+				return true
+			}
+		}
 		return false
 	}
 
