@@ -9,7 +9,7 @@ import (
 	"github.com/DebuggerAndrzej/tli/backend/entities"
 )
 
-func LoadData(filePath, logFormat, pipedInput string) []entities.LogEntry {
+func LoadData(filePath, logFormat, pipedInput, warningIndicator, errorIndicator string) []entities.LogEntry {
 	var content string
 	if filePath != "" {
 		fileContent, err := os.ReadFile(filePath)
@@ -23,7 +23,7 @@ func LoadData(filePath, logFormat, pipedInput string) []entities.LogEntry {
 	}
 	var logEntries []entities.LogEntry
 	for _, entry := range strings.Split(content, "\n") {
-		logEntry := getLogEntryForLine(entry, logFormat)
+		logEntry := getLogEntryForLine(entry, logFormat, warningIndicator, errorIndicator)
 		if logEntry.Message != "" {
 			logEntries = append(logEntries, logEntry)
 		}
@@ -32,12 +32,13 @@ func LoadData(filePath, logFormat, pipedInput string) []entities.LogEntry {
 	return logEntries
 }
 
-func getLogEntryForLine(entry, logFormat string) entities.LogEntry {
+func getLogEntryForLine(entry, logFormat, warningIndicator, errorIndicator string) entities.LogEntry {
 	sliced := strings.Split(entry, " ")
 	format := strings.Split(logFormat, " ")
+	level := getLogLevel(sliced, format, warningIndicator, errorIndicator)
 	return entities.LogEntry{
 		Timestamp: getPartOfEntry(sliced, format, "T"),
-		Level:     getPartOfEntry(sliced, format, "S"),
+		Level:     level,
 		Message:   getPartOfEntry(sliced, format, "M"),
 	}
 }
@@ -74,4 +75,18 @@ func getIndexesOfPart(logFormat []string, entryPart string) []int {
 
 func isLineShortedThenExpected(expected, actual int) bool {
 	return expected >= actual
+}
+
+func getLogLevel(slicedEntry, format []string, warningIndicator, errorIndicator string) string {
+	level := getPartOfEntry(slicedEntry, format, "S")
+
+	if level != "" {
+		if strings.Contains(level, warningIndicator) {
+			return "WARN"
+		}
+		if strings.Contains(level, errorIndicator) {
+			return "ERROR"
+		}
+	}
+	return level
 }

@@ -31,8 +31,11 @@ type model struct {
 	minimalSeverity         string
 }
 
-func initModel(filePath, logFormat, pipedInput string) model {
-	return model{logEntries: backend.LoadData(filePath, logFormat, pipedInput), textInput: textinput.New()}
+func initModel(filePath, logFormat, pipedInput, warningIndicator, errorIndicator string) model {
+	return model{
+		logEntries: backend.LoadData(filePath, logFormat, pipedInput, warningIndicator, errorIndicator),
+		textInput:  textinput.New(),
+	}
 }
 
 func (m model) headerView() string {
