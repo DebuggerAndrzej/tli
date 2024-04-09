@@ -13,6 +13,8 @@ import (
 
 func main() {
 	logFormat := flag.String("f", "M", "log format")
+	warningIndicator := flag.String("w", "WARN", "warning indicator")
+	errorIndicator := flag.String("e", "ERROR", "error indicator")
 	flag.Parse()
 	filePath := flag.Arg(0)
 
@@ -25,7 +27,7 @@ func main() {
 		exitWithMessage("Can't handle both ways of passing inputs. At least for now...")
 	}
 
-	ui.InitTui(filePath, *logFormat, pipedInput)
+	ui.InitTui(filePath, *logFormat, pipedInput, *warningIndicator, *errorIndicator)
 }
 
 func getPipedInput() string {
