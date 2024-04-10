@@ -143,7 +143,7 @@ func (m model) updateYOffset() (model, tea.Cmd) {
 	}
 	offset := m.caculateViewportOffsetForSearchHit()
 	m.viewport.SetYOffset(offset)
-	return m, nil
+	return m, viewport.Sync(m.viewport) 
 }
 
 func (m model) caculateViewportOffsetForSearchHit() int {
@@ -169,7 +169,8 @@ func (m model) handleWindowSizeMsg(msg tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 	verticalMarginHeight := headerHeight + footerHeight
 	if !m.ready {
 		m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
-		m.viewport.YPosition = headerHeight
+		m.viewport.YPosition = headerHeight +1
+		m.viewport.HighPerformanceRendering= true
 		m.ready = true
 	} else {
 		m.viewport.Width = msg.Width

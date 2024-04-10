@@ -1,12 +1,12 @@
 package ui
 
 import (
-	"fmt"
 
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
-
+type syncMsg bool
 type requiresOffsetCalculation bool
 
 type updatedContents struct {
@@ -36,6 +36,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.viewport.SetContent(msg.Content)
 		m.searchedOccurances = msg.searchedIndexes
 		m.visibleLogEntriesAmount = msg.maxIndex
+		return m, requiresSync
+	case syncMsg:
+		return m, viewport.Sync(m.viewport)
 	case requiresOffsetCalculation:
 		return m.updateYOffset()
 	}
@@ -59,6 +62,11 @@ func (m model) View() string {
 		mainContent = emptyViewStyle.Render("No results left...")
 	} else {
 		mainContent = m.viewport.View()
+		//mainContent = "TEST"
 	}
-	return fmt.Sprintf("%s\n%s\n%s", m.headerView(), mainContent, m.footerView())
+	return lipgloss.JoinVertical(lipgloss.Top, m.headerView(), mainContent, m.footerView())
+}
+
+func requiresSync() tea.Msg {
+	return syncMsg(true)
 }

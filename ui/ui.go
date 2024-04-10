@@ -9,6 +9,7 @@ import (
 
 func InitTui(filePath, logFormat, pipedInput, warningIndicator, errorIndicator string) {
 	model := initModel(filePath, logFormat, pipedInput, warningIndicator, errorIndicator)
+	f, _ := tea.LogToFile("debug.log", "debug")
 	p := tea.NewProgram(
 		model,
 		tea.WithAltScreen(),
@@ -19,4 +20,5 @@ func InitTui(filePath, logFormat, pipedInput, warningIndicator, errorIndicator s
 		fmt.Println("could not run program:", err)
 		os.Exit(1)
 	}
+	defer f.Close()
 }
